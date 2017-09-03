@@ -1,0 +1,1 @@
+consul plugin for caddy

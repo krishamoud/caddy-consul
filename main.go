@@ -18,7 +18,7 @@ var caddyfilePath string
 var started = time.Now()
 
 func init() {
-	caddy.RegisterCaddyfileLoader("myloader", caddy.LoaderFunc(myLoader))
+	caddy.RegisterCaddyfileLoader("consulLoader", caddy.LoaderFunc(consulLoader))
 }
 
 func reloadCaddy() {
@@ -30,7 +30,7 @@ func reloadCaddy() {
 	self.Signal(syscall.SIGUSR1)
 }
 
-func myLoader(serverType string) (caddy.Input, error) {
+func consulLoader(serverType string) (caddy.Input, error) {
 
 	// return early, if we can
 	if consulGenerator != nil {
@@ -39,7 +39,7 @@ func myLoader(serverType string) (caddy.Input, error) {
 
 	// Assume localhost, if it's not set in the environment
 	consulAddress := os.Getenv("CONSUL")
-	caddyfilePath = os.Getenv("CADDY_FILE_PATH")
+	caddyfilePath = os.Getenv("CADDYFILE_PATH")
 	if consulAddress == "" {
 		consulAddress = "127.0.0.1:8500"
 	}
@@ -63,6 +63,7 @@ func myLoader(serverType string) (caddy.Input, error) {
 
 	// Actually create the right instance as a generator that caddy needs
 	consulGenerator = new(caddyfile)
+
 	// let the KV and Service portions generate once so we have content for the caddy file when caddy asks the first time
 	consulGenerator.WatchServices(false)
 
@@ -72,10 +73,4 @@ func myLoader(serverType string) (caddy.Input, error) {
 	// Start our loop that keeps checking on consul
 	consulGenerator.StartWatching()
 	return consulGenerator, nil
-}
-
-func checkErr(err error) {
-	if err != nil {
-		fmt.Println(err.Error())
-	}
 }

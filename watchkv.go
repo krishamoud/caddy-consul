@@ -24,8 +24,6 @@ func (s *caddyfile) WatchKV(reload bool) {
 	fmt.Println("Watching for new KV with index", s.lastKV, "or better")
 	pairs, meta, err := kv.List("caddy/", &opts)
 	if err != nil {
-		fmt.Println(err)
-		// this should probably be logged
 		return
 	}
 	if meta.LastIndex > s.lastKV {
@@ -36,7 +34,6 @@ func (s *caddyfile) WatchKV(reload bool) {
 		kv.Put(&api.KVPair{Key: "caddy/"}, nil)
 	}
 
-	// TODO actually make a new one, don't just keep using the old one
 	domains := make(map[string]*domain)
 	for _, k := range pairs {
 		keybits := strings.SplitN(k.Key, "/", 3)
